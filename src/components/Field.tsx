@@ -1,16 +1,42 @@
-import React from 'react';
-import { Paragraph } from '@contentful/forma-36-react-components';
+import React, { useState, useEffect } from 'react';
+import {
+  TextInput,
+  Note,
+  Paragraph
+} from '@contentful/forma-36-react-components';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
+import dayjs from 'dayjs';
 
 interface FieldProps {
   sdk: FieldExtensionSDK;
 }
 
 const Field = (props: FieldProps) => {
-  // If you only want to extend Contentful's default editing experience
-  // reuse Contentful's editor components
-  // -> https://www.contentful.com/developers/docs/extensibility/field-editors/
-  return <Paragraph>Hello Entry Field Component</Paragraph>;
+  const { sdk } = props;
+  const createdAtRaw = new Date( sdk.entry.getSys().createdAt );
+  const createdAt = dayjs(createdAtRaw).format("YYYYMMDD_HH:mm");
+  const [inputSlug, setInputSlug] = useState(createdAt);
+
+  useEffect(() => {
+    sdk.field.setValue(inputSlug)
+  })
+
+  //記事ID使いたい場合: sdk.entry.getSys().id
+
+  return (
+    <>
+      <TextInput
+        defaultValue={sdk.field.getValue()
+         ? sdk.field.getValue()
+         : createdAt
+        } 
+        onChange={(
+            ev: React.ChangeEvent<HTMLInputElement>,
+          ): void => setInputSlug(ev.target.value)
+        }
+      />
+    </>
+  );
 };
 
 export default Field;
